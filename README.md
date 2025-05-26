@@ -176,4 +176,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Author
 
-Developed by **Martin**. For inquiries, please contact [martin@example.com](mailto:martin@example.com).
+Developed by **Martin**.
