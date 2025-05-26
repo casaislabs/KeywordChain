@@ -1,0 +1,26 @@
+{
+  "name": "smart-contract",
+  "version": "1.0.0",
+  "description": "Smart contract project for KeywordChain",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat ignition deploy ./ignition/modules/KeywordChainModule.js --network sepolia"
+  },
+  "keywords": [
+    "solidity",
+    "smart-contract",
+    "blockchain"
+  ],
+  "author": "martin",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.24.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0"
+  }
+}
