@@ -75,20 +75,34 @@ contract MessageChain {
 
     /// @notice Adds a new message to the chain.
     /// @param text The content of the message.
-    function addMessage(string calldata text) external onlyValidText(text) nonReentrant {
-        // Extract the last word from the text as the new keyword
-        string memory newKeyword = extractLastWord(text);
+function addMessage(string calldata text) external onlyValidText(text) nonReentrant {
+    // Extract the last word from the text as the new keyword
+    string memory newKeyword = extractLastWord(text);
 
-        // Validate the new keyword
-        if (bytes(newKeyword).length == 0) revert InvalidKeyword();
-        if (bytes(newKeyword).length > MAX_KEYWORD_LENGTH) revert KeywordTooLong();
-        if (!isValidKeyword(newKeyword)) revert InvalidCharacters();
+    // Validate the new keyword
+    if (bytes(newKeyword).length == 0) revert InvalidKeyword();
+    if (bytes(newKeyword).length > MAX_KEYWORD_LENGTH) revert KeywordTooLong();
+    if (!isValidKeyword(newKeyword)) revert InvalidCharacters();
 
-        // Add the new message to the chain
-        messages.push(Message(msg.sender, newKeyword));
+    // Validate that the new phrase starts with the last keyword of the last message
+    if (messages.length > 0) {
+        string memory lastKeyword = messages[messages.length - 1].keyword;
+        bytes memory textBytes = bytes(text);
+        bytes memory lastKeywordBytes = bytes(lastKeyword);
 
-        emit MessageAdded(msg.sender, text, newKeyword);
+        // Ensure the text starts with the last keyword
+        for (uint i = 0; i < lastKeywordBytes.length; i++) {
+            if (i >= textBytes.length || textBytes[i] != lastKeywordBytes[i]) {
+                revert InvalidKeyword(); // New phrase does not start with the last keyword
+            }
+        }
     }
+
+    // Add the new message to the chain
+    messages.push(Message(msg.sender, newKeyword));
+
+    emit MessageAdded(msg.sender, text, newKeyword);
+}
 
     /// @notice Returns the total number of messages in the chain.
     /// @return The total number of messages.

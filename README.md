@@ -90,10 +90,10 @@ MessageChain
     √ should initialize with the first keyword
     √ should allow adding a valid message
     √ should revert when adding a message with invalid keyword characters
-    √ should search for messages containing a specific keyword
     √ should revert when adding a message with an empty text
     √ should revert when adding a message exceeding max length
     √ should validate keywords correctly
+    √ should search for messages containing a specific keyword
     √ should retrieve messages in a paginated manner
     √ should revert when retrieving out-of-range messages
     √ should retrieve the last message

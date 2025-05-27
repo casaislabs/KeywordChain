@@ -26,6 +26,16 @@ export const AddPhraseButton = ({ provider }) => {
       // Instantiate the contract with the signer
       const contract = new ethers.Contract(contractAddress, contractABI, signer)
 
+      // Fetch the last message from the contract
+      const lastMessage = await contract.getLastMessage()
+      const lastKeyword = lastMessage.keyword
+
+      // Validate that the new phrase starts with the last keyword
+      if (!phrase.startsWith(lastKeyword)) {
+        alert(`The phrase must start with the last keyword: "${lastKeyword}"`)
+        return
+      }
+
       // Call the addMessage function on the contract
       const tx = await contract.addMessage(phrase)
       await tx.wait() // Wait for the transaction to be confirmed
@@ -34,7 +44,17 @@ export const AddPhraseButton = ({ provider }) => {
       setPhrase('') // Clear the input field
     } catch (error) {
       console.error('Error adding phrase:', error)
-      alert('Failed to add the phrase. Check the console for details.')
+
+      // Handle specific contract errors
+      if (error.data?.message?.includes('InvalidKeyword')) {
+        alert('The phrase does not start with the required keyword.')
+      } else if (error.data?.message?.includes('TextTooLong')) {
+        alert('The phrase exceeds the maximum allowed length.')
+      } else if (error.data?.message?.includes('EmptyText')) {
+        alert('The phrase cannot be empty.')
+      } else {
+        alert('Failed to add the phrase. Check the console for details.')
+      }
     } finally {
       setLoading(false)
     }

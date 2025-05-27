@@ -2,51 +2,36 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("MessageChain", function () {
-  let MessageChain, messageChain, owner, addr1, addr2;
+  let MessageChain, messageChain, owner, addr1;
 
   beforeEach(async function () {
+    [owner, addr1] = await ethers.getSigners();
     MessageChain = await ethers.getContractFactory("MessageChain");
-    [owner, addr1, addr2] = await ethers.getSigners();
     messageChain = await MessageChain.deploy();
   });
 
   it("should initialize with the first keyword", async function () {
-    const messagesCount = await messageChain.getMessagesCount();
-    expect(messagesCount).to.equal(1);
-
-    const firstMessage = await messageChain.messages(0);
-    expect(firstMessage.keyword).to.equal("initialKeyword");
-    expect(firstMessage.author).to.equal("0x0000000000000000000000000000000000000000");
+    const message = await messageChain.getLastMessage();
+    expect(message.keyword).to.equal("initialKeyword");
+    expect(message.author).to.equal("0x0000000000000000000000000000000000000000");
   });
 
   it("should allow adding a valid message", async function () {
-    const newMessage = "Hello world initialKeyword";
-    await messageChain.connect(addr1).addMessage(newMessage);
+    const text = "initialKeyword Hello";
+    await expect(messageChain.connect(addr1).addMessage(text))
+      .to.emit(messageChain, "MessageAdded")
+      .withArgs(addr1.address, text, "Hello");
 
-    const messagesCount = await messageChain.getMessagesCount();
-    expect(messagesCount).to.equal(2);
-
-    const lastMessage = await messageChain.messages(1);
-    expect(lastMessage.keyword).to.equal("initialKeyword");
+    const lastMessage = await messageChain.getLastMessage();
+    expect(lastMessage.keyword).to.equal("Hello");
     expect(lastMessage.author).to.equal(addr1.address);
   });
 
   it("should revert when adding a message with invalid keyword characters", async function () {
-    const invalidMessage = "This ends in #invalid!";
+    const invalidText = "initialKeyword hello$";
     await expect(
-      messageChain.connect(addr1).addMessage(invalidMessage)
+      messageChain.connect(addr1).addMessage(invalidText)
     ).to.be.revertedWithCustomError(messageChain, "InvalidCharacters");
-  });
-
-  it("should search for messages containing a specific keyword", async function () {
-    await messageChain.connect(addr1).addMessage("First msg initialKeyword");
-    await messageChain.connect(addr2).addMessage("Second msg initialKeyword");
-
-    const results = await messageChain.searchMessagesByKeyword("initialKeyword");
-    expect(results.length).to.equal(3); // includes constructor message
-    results.forEach(msg => {
-      expect(msg.keyword).to.equal("initialKeyword");
-    });
   });
 
   it("should revert when adding a message with an empty text", async function () {
@@ -56,47 +41,53 @@ describe("MessageChain", function () {
   });
 
   it("should revert when adding a message exceeding max length", async function () {
-    const longMessage = "a".repeat(257);
+    const longText = "initialKeyword " + "a".repeat(257);
     await expect(
-      messageChain.connect(addr1).addMessage(longMessage)
+      messageChain.connect(addr1).addMessage(longText)
     ).to.be.revertedWithCustomError(messageChain, "TextTooLong");
   });
 
   it("should validate keywords correctly", async function () {
-    expect(await messageChain.isValidKeyword("valid123")).to.be.true;
-    expect(await messageChain.isValidKeyword("invalid keyword")).to.be.false;
+    expect(await messageChain.isValidKeyword("abc123")).to.be.true;
+    expect(await messageChain.isValidKeyword("abc-123")).to.be.false;
     expect(await messageChain.isValidKeyword("")).to.be.false;
   });
 
-  it("should retrieve messages in a paginated manner", async function () {
-    await messageChain.connect(addr1).addMessage("Message A initialKeyword");
-    await messageChain.connect(addr2).addMessage("Message B initialKeyword");
+  it("should search for messages containing a specific keyword", async function () {
+    await messageChain.connect(addr1).addMessage("initialKeyword hello");
+    await messageChain.connect(addr1).addMessage("hello world");
+    const messages = await messageChain.searchMessagesByKeyword("world");
+    expect(messages.length).to.equal(1);
+    expect(messages[0].keyword).to.equal("world");
+  });
 
-    const msgs = await messageChain.getMessages(0, 2);
-    expect(msgs.length).to.equal(2);
-    msgs.forEach(msg => {
-      expect(msg.keyword).to.equal("initialKeyword");
-    });
+  it("should retrieve messages in a paginated manner", async function () {
+    await messageChain.connect(addr1).addMessage("initialKeyword one");
+    await messageChain.connect(addr1).addMessage("one two");
+    await messageChain.connect(addr1).addMessage("two three");
+
+    const paginated = await messageChain.getMessages(1, 2);
+    expect(paginated.length).to.equal(2);
+    expect(paginated[0].keyword).to.equal("one");
+    expect(paginated[1].keyword).to.equal("two");
   });
 
   it("should revert when retrieving out-of-range messages", async function () {
     await expect(
-      messageChain.getMessages(10, 5)
+      messageChain.getMessages(100, 1)
     ).to.be.revertedWithCustomError(messageChain, "OutOfRange");
   });
 
   it("should retrieve the last message", async function () {
-    await messageChain.connect(addr1).addMessage("Last one initialKeyword");
-    const last = await messageChain.getLastMessage();
-    expect(last.keyword).to.equal("initialKeyword");
-    expect(last.author).to.equal(addr1.address);
+    await messageChain.connect(addr1).addMessage("initialKeyword finalWord");
+    const lastMessage = await messageChain.getLastMessage();
+    expect(lastMessage.keyword).to.equal("finalWord");
   });
 
   it("should emit event when message is added", async function () {
-    const newMessage = "Emit test initialKeyword";
-    await expect(messageChain.connect(addr1).addMessage(newMessage))
+    const text = "initialKeyword eventTest";
+    await expect(messageChain.connect(addr1).addMessage(text))
       .to.emit(messageChain, "MessageAdded")
-      .withArgs(addr1.address, newMessage, "initialKeyword");
+      .withArgs(addr1.address, text, "eventTest");
   });
-
 });

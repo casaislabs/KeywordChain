@@ -1,11 +1,7 @@
-export const contractAddress = "0xD91905FD695d566440a40080a66c18155F30cB40";
+export const contractAddress = "0x37bd1338bE81ecE1bd54eb791ada6E09591E6a59";
 
 export const contractABI = [
-  {
-    inputs: [{ internalType: "string", name: "firstKeyword", type: "string" }],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
+  { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   { inputs: [], name: "EmptyText", type: "error" },
   { inputs: [], name: "InvalidCharacters", type: "error" },
   { inputs: [], name: "InvalidKeyword", type: "error" },
@@ -98,7 +94,6 @@ export const contractABI = [
       {
         components: [
           { internalType: "address", name: "author", type: "address" },
-          { internalType: "string", name: "text", type: "string" },
           { internalType: "string", name: "keyword", type: "string" },
         ],
         internalType: "struct MessageChain.Message",
@@ -119,7 +114,6 @@ export const contractABI = [
       {
         components: [
           { internalType: "address", name: "author", type: "address" },
-          { internalType: "string", name: "text", type: "string" },
           { internalType: "string", name: "keyword", type: "string" },
         ],
         internalType: "struct MessageChain.Message[]",
@@ -149,7 +143,6 @@ export const contractABI = [
     name: "messages",
     outputs: [
       { internalType: "address", name: "author", type: "address" },
-      { internalType: "string", name: "text", type: "string" },
       { internalType: "string", name: "keyword", type: "string" },
     ],
     stateMutability: "view",
@@ -162,7 +155,6 @@ export const contractABI = [
       {
         components: [
           { internalType: "address", name: "author", type: "address" },
-          { internalType: "string", name: "text", type: "string" },
           { internalType: "string", name: "keyword", type: "string" },
         ],
         internalType: "struct MessageChain.Message[]",
