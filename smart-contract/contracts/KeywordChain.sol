@@ -4,11 +4,9 @@ pragma solidity ^0.8.0;
 contract MessageChain {
     /// @notice Represents a message in the chain.
     /// @param author The address of the message author.
-    /// @param text The content of the message.
     /// @param keyword The keyword associated with the message.
     struct Message {
         address author;
-        string text;
         string keyword;
     }
 
@@ -50,16 +48,10 @@ contract MessageChain {
     /// @dev Reentrancy guard variable.
     bool private locked;
 
-    /// @notice Initializes the chain with a starting keyword.
-    /// @param firstKeyword The initial keyword to start the chain.
-    constructor(string memory firstKeyword) {
-        require(bytes(firstKeyword).length > 0, "Initial keyword is empty");
-        require(
-            bytes(firstKeyword).length <= MAX_KEYWORD_LENGTH,
-            "Initial keyword is too long"
-        );
-        require(isValidKeyword(firstKeyword), "Initial keyword contains invalid characters");
-        messages.push(Message(address(0), unicode"Chain start", firstKeyword));
+    /// @notice Initializes the chain with a default message.
+    constructor() {
+        // Add the initial message directly on-chain
+        messages.push(Message(address(0), "initialKeyword"));
     }
 
     /// @dev Modifier to validate that the text is not empty and does not exceed the maximum length.
@@ -83,18 +75,17 @@ contract MessageChain {
 
     /// @notice Adds a new message to the chain.
     /// @param text The content of the message.
-    /// @dev The message must contain the keyword from the previous message.
     function addMessage(string calldata text) external onlyValidText(text) nonReentrant {
-        string memory lastKeyword = messages[messages.length - 1].keyword;
-
-        if (!containsWord(text, lastKeyword)) revert InvalidKeyword();
-
+        // Extract the last word from the text as the new keyword
         string memory newKeyword = extractLastWord(text);
+
+        // Validate the new keyword
         if (bytes(newKeyword).length == 0) revert InvalidKeyword();
         if (bytes(newKeyword).length > MAX_KEYWORD_LENGTH) revert KeywordTooLong();
         if (!isValidKeyword(newKeyword)) revert InvalidCharacters();
 
-        messages.push(Message(msg.sender, text, newKeyword));
+        // Add the new message to the chain
+        messages.push(Message(msg.sender, newKeyword));
 
         emit MessageAdded(msg.sender, text, newKeyword);
     }
@@ -139,7 +130,7 @@ contract MessageChain {
 
         // First pass: count matching messages
         for (uint i = 0; i < messages.length; i++) {
-            if (containsWord(messages[i].text, keyword)) {
+            if (keccak256(bytes(messages[i].keyword)) == keccak256(bytes(keyword))) {
                 count++;
             }
         }
@@ -150,7 +141,7 @@ contract MessageChain {
 
         // Second pass: populate the array
         for (uint i = 0; i < messages.length; i++) {
-            if (containsWord(messages[i].text, keyword)) {
+            if (keccak256(bytes(messages[i].keyword)) == keccak256(bytes(keyword))) {
                 matchingMessages[index] = messages[i];
                 index++;
             }
@@ -164,31 +155,6 @@ contract MessageChain {
     function getLastMessage() external view returns (Message memory) {
         if (messages.length == 0) revert OutOfRange(); // Handle case where no messages exist
         return messages[messages.length - 1];
-    }
-
-    /// @dev Checks if a text contains a specific keyword.
-    /// @param haystack The text to search within.
-    /// @param needle The keyword to search for.
-    /// @return True if the keyword is found, false otherwise.
-    function containsWord(
-        string memory haystack,
-        string memory needle
-    ) internal pure returns (bool) {
-        bytes memory hay = bytes(haystack);
-        bytes memory need = bytes(needle);
-        if (need.length > hay.length) return false;
-
-        for (uint i = 0; i <= hay.length - need.length; i++) {
-            bool isMatch = true;
-            for (uint j = 0; j < need.length; j++) {
-                if (hay[i + j] != need[j]) {
-                    isMatch = false;
-                    break;
-                }
-            }
-            if (isMatch) return true;
-        }
-        return false;
     }
 
     /// @dev Extracts the last word from a given text.
@@ -216,21 +182,21 @@ contract MessageChain {
     /// @notice Validates the keyword for allowed characters.
     /// @param keyword The keyword to validate.
     /// @return True if the keyword is valid, false otherwise.
-function isValidKeyword(string memory keyword) public pure returns (bool) {
-    bytes memory keywordBytes = bytes(keyword);
-    if (keywordBytes.length == 0) {
-        return false; // Reject empty strings
-    }
-    for (uint i = 0; i < keywordBytes.length; i++) {
-        bytes1 char = keywordBytes[i];
-        if (
-            !(char >= 0x30 && char <= 0x39) && // 0-9
-            !(char >= 0x41 && char <= 0x5A) && // A-Z
-            !(char >= 0x61 && char <= 0x7A)    // a-z
-        ) {
-            return false;
+    function isValidKeyword(string memory keyword) public pure returns (bool) {
+        bytes memory keywordBytes = bytes(keyword);
+        if (keywordBytes.length == 0) {
+            return false; // Reject empty strings
         }
+        for (uint i = 0; i < keywordBytes.length; i++) {
+            bytes1 char = keywordBytes[i];
+            if (
+                !(char >= 0x30 && char <= 0x39) && // 0-9
+                !(char >= 0x41 && char <= 0x5A) && // A-Z
+                !(char >= 0x61 && char <= 0x7A)    // a-z
+            ) {
+                return false;
+            }
+        }
+        return true;
     }
-    return true;
-}
 }

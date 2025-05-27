@@ -25,7 +25,7 @@ The contract has been successfully verified on both Etherscan and Sourcify:
 ## Contract Details
 
 - **Contract Name**: `MessageChain`
-- **Deployed Address**: [0xD91905FD695d566440a40080a66c18155F30cB40](https://sepolia.etherscan.io/address/0xD91905FD695d566440a40080a66c18155F30cB40#code)
+- **Deployed Address**: [0x4588Df975dF7df49612BF6F1588f705E93063af1](https://sepolia.etherscan.io/address/0x4588Df975dF7df49612BF6F1588f705E93063af1#code)
 - **Network**: Sepolia Testnet (Chain ID: 11155111)
 - **Solidity Version**: `^0.8.0`
 
@@ -35,7 +35,7 @@ The contract has been successfully verified on both Etherscan and Sourcify:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/KeywordChain.git
+   git clone https://github.com/martinperezcss/KeywordChain.git
    cd KeywordChain/smart-contract
    ```
 
@@ -70,7 +70,7 @@ To deploy the contract to the Sepolia test network:
 
 3. Verify the contract on Etherscan:
    ```bash
-   npx hardhat verify --network sepolia <Deployed_Contract_Address> "initialKeyword"
+   npx hardhat verify --network sepolia <Deployed_Contract_Address>
    ```
 
 ---
@@ -89,15 +89,15 @@ npm run test
 MessageChain
     √ should initialize with the first keyword
     √ should allow adding a valid message
-    √ should revert when adding a message without the required keyword
+    √ should revert when adding a message with invalid keyword characters
+    √ should search for messages containing a specific keyword
     √ should revert when adding a message with an empty text
-    √ should revert when adding a message with text exceeding the maximum length
+    √ should revert when adding a message exceeding max length
     √ should validate keywords correctly
     √ should retrieve messages in a paginated manner
-    √ should revert when retrieving messages with an invalid range
-    √ should search for messages containing a specific keyword
-    √ should revert when searching with an invalid keyword
-    √ should retrieve the last message in the chain
+    √ should revert when retrieving out-of-range messages
+    √ should retrieve the last message
+    √ should emit event when message is added
 ```
 
 ---
@@ -142,6 +142,12 @@ MessageChain
    ```
    Validates whether a keyword contains only alphanumeric characters.
 
+7. **Extract the Last Word**
+   ```solidity
+   function extractLastWord(string memory text) internal pure returns (string memory);
+   ```
+   Extracts the last word from a given text. This function is used internally to determine the keyword for a new message.
+
 ---
 
 ## Security Features
@@ -162,8 +168,8 @@ MessageChain
 
 ## Resources
 
-- [Etherscan Contract Verification](https://sepolia.etherscan.io/address/0xD91905FD695d566440a40080a66c18155F30cB40#code)
-- [Sourcify Contract Verification](https://repo.sourcify.dev/contracts/full_match/11155111/0xD91905FD695d566440a40080a66c18155F30cB40/)
+- [Etherscan Contract Verification](https://sepolia.etherscan.io/address/0x4588Df975dF7df49612BF6F1588f705E93063af1#code)
+- [Sourcify Contract Verification](https://repo.sourcify.dev/contracts/full_match/11155111/0x4588Df975dF7df49612BF6F1588f705E93063af1/)
 - [Hardhat Documentation](https://hardhat.org/docs)
 
 ---

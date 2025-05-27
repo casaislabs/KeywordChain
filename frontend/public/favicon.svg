@@ -1,0 +1,7 @@
+<!-- filepath: c:\Users\0xuser\Desktop\por\KeywordChain\frontend\public\logo.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="48" stroke="#4F46E5" stroke-width="4" />
+  <text x="50%" y="50%" text-anchor="middle" fill="#4F46E5" font-size="20" font-family="Arial" dy=".3em">
+    KC
+  </text>
+</svg>
