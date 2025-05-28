@@ -4,9 +4,11 @@ pragma solidity ^0.8.0;
 contract MessageChain {
     /// @notice Represents a message in the chain.
     /// @param author The address of the message author.
+    /// @param text The full text of the message.
     /// @param keyword The keyword associated with the message.
     struct Message {
         address author;
+        string text;
         string keyword;
     }
 
@@ -51,7 +53,7 @@ contract MessageChain {
     /// @notice Initializes the chain with a default message.
     constructor() {
         // Add the initial message directly on-chain
-        messages.push(Message(address(0), "initialKeyword"));
+        messages.push(Message(address(0), "Welcome to the MessageChain!", "MessageChain"));
     }
 
     /// @dev Modifier to validate that the text is not empty and does not exceed the maximum length.
@@ -75,34 +77,34 @@ contract MessageChain {
 
     /// @notice Adds a new message to the chain.
     /// @param text The content of the message.
-function addMessage(string calldata text) external onlyValidText(text) nonReentrant {
-    // Extract the last word from the text as the new keyword
-    string memory newKeyword = extractLastWord(text);
+    function addMessage(string calldata text) external onlyValidText(text) nonReentrant {
+        // Extract the last word from the text as the new keyword
+        string memory newKeyword = extractLastWord(text);
 
-    // Validate the new keyword
-    if (bytes(newKeyword).length == 0) revert InvalidKeyword();
-    if (bytes(newKeyword).length > MAX_KEYWORD_LENGTH) revert KeywordTooLong();
-    if (!isValidKeyword(newKeyword)) revert InvalidCharacters();
+        // Validate the new keyword
+        if (bytes(newKeyword).length == 0) revert InvalidKeyword();
+        if (bytes(newKeyword).length > MAX_KEYWORD_LENGTH) revert KeywordTooLong();
+        if (!isValidKeyword(newKeyword)) revert InvalidCharacters();
 
-    // Validate that the new phrase starts with the last keyword of the last message
-    if (messages.length > 0) {
-        string memory lastKeyword = messages[messages.length - 1].keyword;
-        bytes memory textBytes = bytes(text);
-        bytes memory lastKeywordBytes = bytes(lastKeyword);
+        // Validate that the new phrase starts with the last keyword of the last message
+        if (messages.length > 0) {
+            string memory lastKeyword = messages[messages.length - 1].keyword;
+            bytes memory textBytes = bytes(text);
+            bytes memory lastKeywordBytes = bytes(lastKeyword);
 
-        // Ensure the text starts with the last keyword
-        for (uint i = 0; i < lastKeywordBytes.length; i++) {
-            if (i >= textBytes.length || textBytes[i] != lastKeywordBytes[i]) {
-                revert InvalidKeyword(); // New phrase does not start with the last keyword
+            // Ensure the text starts with the last keyword
+            for (uint i = 0; i < lastKeywordBytes.length; i++) {
+                if (i >= textBytes.length || textBytes[i] != lastKeywordBytes[i]) {
+                    revert InvalidKeyword(); // New phrase does not start with the last keyword
+                }
             }
         }
+
+        // Add the new message to the chain
+        messages.push(Message(msg.sender, text, newKeyword));
+
+        emit MessageAdded(msg.sender, text, newKeyword);
     }
-
-    // Add the new message to the chain
-    messages.push(Message(msg.sender, newKeyword));
-
-    emit MessageAdded(msg.sender, text, newKeyword);
-}
 
     /// @notice Returns the total number of messages in the chain.
     /// @return The total number of messages.

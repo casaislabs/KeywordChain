@@ -1,81 +1,90 @@
-import { useState } from 'react'
-import { ethers } from 'ethers'
-import { contractAddress, contractABI } from '../providers/contractConfig'
+import { useState } from 'react';
+import { ethers } from 'ethers';
+import { contractAddress, contractABI } from '../providers/contractConfig';
 
-export const AddPhraseButton = ({ provider }) => {
-  const [phrase, setPhrase] = useState('')
-  const [loading, setLoading] = useState(false)
+export const AddPhraseButton = ({ provider, onPhraseAdded }) => {
+  const [phrase, setPhrase] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const addPhrase = async () => {
     if (!provider) {
-      alert('Please connect your wallet first.')
-      return
+      alert('Please connect your wallet first.');
+      return;
     }
 
     if (!phrase.trim()) {
-      alert('Please enter a valid phrase.')
-      return
+      alert('Please enter a valid phrase.');
+      return;
     }
 
     try {
-      setLoading(true)
+      setLoading(true);
 
-      // Get the signer from the provider
-      const signer = await provider.getSigner()
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-      // Instantiate the contract with the signer
-      const contract = new ethers.Contract(contractAddress, contractABI, signer)
+      // Get the last message from the contract
+      const lastMessage = await contract.getLastMessage();
+      const lastKeyword = lastMessage.keyword;
 
-      // Fetch the last message from the contract
-      const lastMessage = await contract.getLastMessage()
-      const lastKeyword = lastMessage.keyword
-
-      // Validate that the new phrase starts with the last keyword
+      // Validate that the phrase starts with the last keyword
       if (!phrase.startsWith(lastKeyword)) {
-        alert(`The phrase must start with the last keyword: "${lastKeyword}"`)
-        return
+        alert(`The phrase must start with the last keyword: "${lastKeyword}"`);
+        return;
       }
 
-      // Call the addMessage function on the contract
-      const tx = await contract.addMessage(phrase)
-      await tx.wait() // Wait for the transaction to be confirmed
+      // Add the new phrase to the contract
+      const tx = await contract.addMessage(phrase);
+      await tx.wait();
 
-      alert('Phrase added successfully!')
-      setPhrase('') // Clear the input field
+      // Extract the new keyword from the added phrase
+      const newKeyword = phrase.split(' ').pop();
+
+      alert('Phrase added successfully!');
+      setPhrase('');
+
+      // Notify the parent component (App.jsx) about the added phrase
+      if (onPhraseAdded) {
+        onPhraseAdded(phrase, newKeyword);
+      }
     } catch (error) {
-      console.error('Error adding phrase:', error)
+      console.error('Error adding phrase:', error);
 
-      // Handle specific contract errors
+      // Handle specific errors from the contract
       if (error.data?.message?.includes('InvalidKeyword')) {
-        alert('The phrase does not start with the required keyword.')
+        alert('The phrase does not start with the required keyword.');
       } else if (error.data?.message?.includes('TextTooLong')) {
-        alert('The phrase exceeds the maximum allowed length.')
+        alert('The phrase exceeds the maximum allowed length.');
       } else if (error.data?.message?.includes('EmptyText')) {
-        alert('The phrase cannot be empty.')
+        alert('The phrase cannot be empty.');
       } else {
-        alert('Failed to add the phrase. Check the console for details.')
+        alert('Failed to add the phrase. Check the console for details.');
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 text-center animate-fadeIn">
       <input
         type="text"
         value={phrase}
         onChange={(e) => setPhrase(e.target.value)}
         placeholder="Enter your phrase"
-        className="px-4 py-2 border rounded w-full mb-4"
+        className="px-4 py-2 bg-gray-800 text-gray-200 border border-gray-600 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
       />
       <button
         onClick={addPhrase}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className={`px-4 py-2 rounded-lg shadow-md font-bold transition-all ${
+          loading
+            ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+            : 'bg-green-500 text-white hover:bg-green-600 hover:scale-105 animate-pulse'
+        }`}
         disabled={loading}
       >
         {loading ? 'Adding...' : 'Add Phrase'}
       </button>
     </div>
-  )
-}
+  );
+};
