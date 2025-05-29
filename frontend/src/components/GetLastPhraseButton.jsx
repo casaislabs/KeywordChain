@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ethers } from 'ethers'
-import { contractAddress, contractABI } from '../providers/contractConfig'
+import { contractAddress, contractABI } from '../config/contractConfig'
 
 export const GetLastPhraseButton = ({ provider, onFetchLastPhrase }) => {
   const [loading, setLoading] = useState(false)

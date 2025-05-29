@@ -1,13 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App'
-import { WalletProvider } from './providers/WalletProvider'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App';
+import { WagmiConfig } from 'wagmi';
+import { wagmiConfig } from './config/wagmiConfig';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <WalletProvider>
+    <WagmiConfig config={wagmiConfig}>
       <App />
-    </WalletProvider>
+    </WagmiConfig>
   </StrictMode>
-)
+);

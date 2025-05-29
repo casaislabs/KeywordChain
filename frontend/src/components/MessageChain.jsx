@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { contractAddress, contractABI } from '../providers/contractConfig';
+import { contractAddress, contractABI } from '../config/contractConfig';
 
 export const MessageChain = ({ provider, refresh }) => {
   const [messages, setMessages] = useState([]);

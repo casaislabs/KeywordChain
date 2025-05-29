@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
-import { contractAddress, contractABI } from '../providers/contractConfig';
+import { contractAddress, contractABI } from '../config/contractConfig';
 
 export const AddPhraseButton = ({ provider, onPhraseAdded }) => {
   const [phrase, setPhrase] = useState('');
@@ -8,7 +8,7 @@ export const AddPhraseButton = ({ provider, onPhraseAdded }) => {
 
   const addPhrase = async () => {
     if (!provider) {
-      alert('Please connect your wallet first.');
+      alert('Provider is not initialized. Please ensure your wallet is connected.');
       return;
     }
 
