@@ -7,24 +7,28 @@ import { GetLastPhraseButton } from './components/GetLastPhraseButton';
 import { AddPhraseButton } from './components/AddPhraseButton';
 import { MessageChain } from './components/MessageChain';
 
+// Main application component
 function App() {
-  const [provider, setProvider] = useState(null);
-  const [particlesInit, setParticlesInit] = useState(false);
-  const [lastPhrase, setLastPhrase] = useState(null);
-  const [addedPhrase, setAddedPhrase] = useState(null);
-  const [refreshMessages, setRefreshMessages] = useState(false);
-  const [account, setAccount] = useState(null);
+  const [provider, setProvider] = useState(null); // State to store the blockchain provider
+  const [particlesInit, setParticlesInit] = useState(false); // State to track particles initialization
+  const [lastPhrase, setLastPhrase] = useState(null); // State to store the last fetched phrase
+  const [addedPhrase, setAddedPhrase] = useState(null); // State to store the last added phrase
+  const [refreshMessages, setRefreshMessages] = useState(false); // State to trigger message chain refresh
+  const [account, setAccount] = useState(null); // State to store the connected account
 
+  // Callback to update the provider state
   const handleProviderUpdate = useCallback((newProvider) => {
     console.log('Provider updated:', newProvider);
     setProvider(newProvider);
   }, []);
 
+  // Callback to update the account state
   const handleAccountUpdate = useCallback((newAccount) => {
     console.log('Account updated:', newAccount);
     setAccount(newAccount);
   }, []);
 
+  // Effect to log synchronization between provider and account
   useEffect(() => {
     if (provider && account) {
       console.log('Account and provider are synchronized:', account, provider);
@@ -33,11 +37,12 @@ function App() {
     }
   }, [provider, account]);
 
+  // Effect to initialize particles animation
   useEffect(() => {
     const initParticles = async () => {
       try {
-        await loadSlim(window.tsParticles);
-        setParticlesInit(true);
+        await loadSlim(window.tsParticles); // Load slim version of tsparticles
+        setParticlesInit(true); // Mark particles as initialized
       } catch (error) {
         console.error('Error initializing tsparticles:', error);
       }
@@ -45,6 +50,7 @@ function App() {
     initParticles();
   }, []);
 
+  // Configuration for particles animation
   const particlesOptions = {
     background: {
       color: { value: '#0d1117' },
@@ -62,12 +68,13 @@ function App() {
     detectRetina: true,
   };
 
+  // Render the application UI
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
       {particlesInit && (
         <Particles
           id="tsparticles"
-          options={particlesOptions}
+          options={particlesOptions} // Apply particles configuration
           style={{
             position: 'absolute',
             top: 0,
@@ -79,6 +86,7 @@ function App() {
         />
       )}
       {!provider || !account ? (
+        // Render initial card if wallet is not connected
         <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-3xl shadow-2xl text-center animate-fadeIn border border-gray-700 relative z-10 space-y-6">
           <header className="flex justify-center mb-6">
             <img
@@ -103,6 +111,7 @@ function App() {
           </div>
         </div>
       ) : (
+        // Render main application UI if wallet is connected
         <div className="max-w-4xl mx-auto p-8 bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-3xl shadow-2xl text-center animate-fadeIn border border-gray-700 relative z-10 transform transition-transform hover:scale-105 overflow-y-auto max-h-[calc(100vh-4rem)]">
           <header className="flex justify-between items-center mb-8">
             <a href="/" target="_self" rel="noopener noreferrer">

@@ -2,92 +2,107 @@ import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { contractAddress, contractABI } from '../config/contractConfig';
 
+// This component displays the chain of messages stored in the smart contract
 export const MessageChain = ({ provider, refresh }) => {
-  const [messages, setMessages] = useState([]);
-  const [visibleMessages, setVisibleMessages] = useState(3);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false); // Track network switching
+  const [messages, setMessages] = useState([]); // State to store fetched messages
+  const [visibleMessages, setVisibleMessages] = useState(3); // State to control the number of visible messages
+  const [loading, setLoading] = useState(false); // State to track loading status
+  const [error, setError] = useState(null); // State to store error messages
+  const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false); // State to track network switching
 
+  // Function to fetch messages from the smart contract
   const fetchMessages = useCallback(async () => {
     if (!provider || isSwitchingNetwork) {
-      setMessages([]);
+      setMessages([]); // Clear messages if provider is unavailable or network is switching
       return;
     }
 
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(true); // Set loading state to true while fetching messages
+      setError(null); // Clear previous errors
 
+      // Check the current network
       const network = await provider.getNetwork();
       if (network.chainId !== 11155111n) {
         setError('Wrong network. Please switch to Sepolia in MetaMask.');
-        setMessages([]);
+        setMessages([]); // Clear messages if on the wrong network
         return;
       }
 
+      // Get the signer from the provider
       const signer = await provider.getSigner();
+
+      // Initialize the contract instance using the signer
       const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
+      // Fetch the total number of messages and retrieve them
       const totalMessages = await contract.getMessagesCount();
       const allMessages = await contract.getMessages(0, totalMessages);
 
+      // Format the messages for display
       const formattedMessages = allMessages.map((message) => ({
         author: message.author,
         text: message.text,
         keyword: message.keyword,
       }));
 
-      setMessages(formattedMessages.reverse());
+      setMessages(formattedMessages.reverse()); // Reverse the order to show the latest messages first
     } catch (error) {
       console.error('Error fetching messages:', error);
       setError('Failed to fetch messages. Check the console for details.');
-      setMessages([]);
+      setMessages([]); // Clear messages on error
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state after fetching
     }
   }, [provider, isSwitchingNetwork]);
 
+  // Effect to fetch messages when the component mounts or refresh is triggered
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages, refresh]);
 
-useEffect(() => {
-  if (!provider || !window.ethereum) return;
+  // Effect to handle network changes
+  useEffect(() => {
+    if (!provider || !window.ethereum) return;
 
-  const handleChainChanged = async () => {
-    setIsSwitchingNetwork(true); // Start network switching state
-    try {
-      const network = await provider.getNetwork();
-      console.log('Chain changed to:', network.chainId.toString());
-      if (network.chainId === 11155111n) {
-        fetchMessages(); // Retry fetching messages if the network is valid
-      } else {
-        setError('Wrong network. Please switch to Sepolia in MetaMask.');
-        setMessages([]);
+    const handleChainChanged = async () => {
+      setIsSwitchingNetwork(true); // Start network switching state
+      try {
+        const network = await provider.getNetwork();
+        console.log('Chain changed to:', network.chainId.toString());
+        if (network.chainId === 11155111n) {
+          fetchMessages(); // Retry fetching messages if the network is valid
+        } else {
+          setError('Wrong network. Please switch to Sepolia in MetaMask.');
+          setMessages([]); // Clear messages if on the wrong network
+        }
+      } catch (err) {
+        if (err.code === 'NETWORK_ERROR') {
+          console.log('Suppressed NETWORK_ERROR during chain change:', err.message);
+        } else {
+          console.error('Error handling chain change:', err);
+          setError('Network error. Please try again.');
+          setMessages([]); // Clear messages on error
+        }
+      } finally {
+        setIsSwitchingNetwork(false); // End network switching state
       }
-    } catch (err) {
-      if (err.code === 'NETWORK_ERROR') {
-        console.log('Suppressed NETWORK_ERROR during chain change:', err.message);
-      } else {
-        console.error('Error handling chain change:', err);
-        setError('Network error. Please try again.');
-        setMessages([]);
-      }
-    } finally {
-      setIsSwitchingNetwork(false); // End network switching state
-    }
-  };
+    };
 
-  window.ethereum.on('chainChanged', handleChainChanged);
-  return () => {
-    window.ethereum.removeListener('chainChanged', handleChainChanged);
-  };
-}, [provider, fetchMessages]);
+    // Register the chainChanged event listener
+    window.ethereum.on('chainChanged', handleChainChanged);
+    return () => {
+      // Cleanup the event listener on unmount
+      window.ethereum.removeListener('chainChanged', handleChainChanged);
+    };
+  }, [provider, fetchMessages]);
+
+  // Function to show more messages
   const handleShowMore = () => {
-    setVisibleMessages((prev) => prev + 3);
+    setVisibleMessages((prev) => prev + 3); // Increase the number of visible messages
   };
 
+  // Render a message indicating network switching
   if (isSwitchingNetwork) {
     return (
       <div className="mt-8 text-center">
@@ -96,6 +111,7 @@ useEffect(() => {
     );
   }
 
+  // Render the message chain UI
   return (
     <div className="mt-8">
       <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-400 mb-6 animate-slideUp">

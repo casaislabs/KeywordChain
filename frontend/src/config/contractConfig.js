@@ -1,5 +1,7 @@
+// Replace this with your deployed contract's address
 export const contractAddress = "0xAD17ee34a3A2b59727C08E992a84a1F160BF21C0";
 
+// Replace this with your contract's ABI (Application Binary Interface)
 export const contractABI = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   { inputs: [], name: "EmptyText", type: "error" },

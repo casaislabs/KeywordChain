@@ -24,7 +24,7 @@ The contract has been successfully verified on both Etherscan and Sourcify.
 
 ## Frontend Features
 
-- **Wallet Connection**: Seamlessly connect your Ethereum wallet using RainbowKit and Wagmi.
+- **Wallet Connection**: Connect your Ethereum wallet seamlessly using MetaMask integration.
 - **Message Display**: View the blockchain-based message chain with pagination and keyword highlights.
 - **Add Messages**: Add new messages to the chain directly from the frontend.
 - **Keyword Validation**: Ensures that the added message starts with the correct keyword.
@@ -39,6 +39,28 @@ The contract has been successfully verified on both Etherscan and Sourcify.
 - **Deployed Address**: [0x4588Df975dF7df49612BF6F1588f705E93063af1](https://sepolia.etherscan.io/address/0xAD17ee34a3A2b59727C08E992a84a1F160BF21C0#code)
 - **Network**: Sepolia Testnet (Chain ID: 11155111)
 - **Solidity Version**: `^0.8.0`
+
+---
+
+
+---
+
+```markdown
+## Contract Limitations
+
+- **Maximum Text Length**: 256 characters.
+- **Maximum Keyword Length**: 32 characters.
+- **Keyword Validation**: Keywords must be alphanumeric.
+- **Reentrancy Protection**: Prevents multiple calls to the same function within a single transaction.
+
+---
+
+## Additional Tests
+
+- **Keyword Validation**: Ensures that keywords contain only alphanumeric characters.
+- **Pagination**: Validates that messages are retrieved correctly in paginated form.
+- **Reentrancy Protection**: Tests that reentrant calls are prevented.
+- **Error Handling**: Verifies that custom errors are thrown for invalid inputs.
 
 ---
 
@@ -232,20 +254,24 @@ MessageChain
 
 ## Technologies Used
 
-### Smart Contract
+### Smart Contract Development
 - **Solidity**: Programming language for writing the `MessageChain` smart contract.
-- **Hardhat**: Development environment for testing and deploying smart contracts.
-- **Ethers.js**: Library for interacting with the Ethereum blockchain.
+- **Hardhat**: Development environment for testing, compiling, and deploying smart contracts.
+- **Ethers.js**: Library for interacting with the Ethereum blockchain, used for contract calls and transactions.
+- **Hardhat Ignition**: Deployment framework for managing complex deployments.
 
-### Frontend
+### Frontend Development
 - **React**: JavaScript library for building the user interface.
-- **RainbowKit**: Toolkit for wallet connection and management.
-- **Wagmi**: React hooks for Ethereum integration.
-- **Ethers.js**: Library for interacting with the Ethereum blockchain from the frontend.
-- **TailwindCSS**: Utility-first CSS framework for styling.
-- **Vite**: Fast build tool for modern web applications.
-- **React Query**: Data fetching and caching for API calls.
-- **Particles.js**: Library for creating interactive particle effects.
+- **Ethers.js**: Used in the frontend for interacting with the Ethereum blockchain and smart contracts.
+- **TailwindCSS**: Utility-first CSS framework for styling, enabling responsive and modern designs.
+- **Vite**: Fast build tool for modern web applications, ensuring quick development and optimized builds.
+- **React Query**: Library for data fetching and caching, improving performance and user experience.
+- **Particles.js**: Library for creating interactive particle effects, enhancing the visual appeal of the application.
+
+### Testing and Deployment
+- **Mocha/Chai**: Frameworks for writing and running tests for the smart contract.
+- **Sepolia Testnet**: Ethereum test network used for deploying and testing the contract.
+- **Vercel**: Platform for deploying the frontend, ensuring scalability and reliability.
 
 ---
 

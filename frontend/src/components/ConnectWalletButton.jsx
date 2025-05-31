@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 
+// This component handles connecting and disconnecting a wallet using MetaMask
 export const ConnectWalletButton = ({ account, provider, onProviderUpdate, onAccountUpdate }) => {
   const [isConnecting, setIsConnecting] = useState(false);
 
+  // Memoized function to update the provider state
   const memoizedOnProviderUpdate = useCallback(
     (provider) => {
       console.log('Updating provider:', provider ? 'New provider set' : 'Provider cleared');
@@ -12,6 +14,7 @@ export const ConnectWalletButton = ({ account, provider, onProviderUpdate, onAcc
     [onProviderUpdate]
   );
 
+  // Memoized function to update the account state
   const memoizedOnAccountUpdate = useCallback(
     (account) => {
       console.log('Updating account:', account || 'Account cleared');
@@ -20,6 +23,7 @@ export const ConnectWalletButton = ({ account, provider, onProviderUpdate, onAcc
     [onAccountUpdate]
   );
 
+  // Function to handle wallet connection
   const handleConnect = async () => {
     try {
       if (!window.ethereum) {
@@ -29,19 +33,20 @@ export const ConnectWalletButton = ({ account, provider, onProviderUpdate, onAcc
 
       setIsConnecting(true);
 
+      // Initialize the provider and request accounts
       const newProvider = new ethers.BrowserProvider(window.ethereum);
       const accounts = await newProvider.send('eth_requestAccounts', []);
       const network = await newProvider.getNetwork();
 
       console.log('Connecting to network:', network.chainId.toString());
 
+      // Ensure the user is connected to the Sepolia network
       if (network.chainId !== 11155111n) {
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0xaa36a7' }], // Sepolia chainId
+            params: [{ chainId: '0xaa36a7' }],
           });
-          // Re-verificar la red después del cambio
           const updatedNetwork = await newProvider.getNetwork();
           if (updatedNetwork.chainId !== 11155111n) {
             alert('Failed to switch to Sepolia. Please select Sepolia in MetaMask.');
@@ -56,6 +61,7 @@ export const ConnectWalletButton = ({ account, provider, onProviderUpdate, onAcc
         }
       }
 
+      // Update the provider and account state if accounts are found
       if (accounts.length > 0) {
         memoizedOnProviderUpdate(newProvider);
         memoizedOnAccountUpdate(accounts[0]);
@@ -70,6 +76,7 @@ export const ConnectWalletButton = ({ account, provider, onProviderUpdate, onAcc
     }
   };
 
+  // Function to handle wallet disconnection
   const handleDisconnect = async () => {
     try {
       console.log('Disconnecting wallet');
@@ -81,10 +88,11 @@ export const ConnectWalletButton = ({ account, provider, onProviderUpdate, onAcc
     }
   };
 
-  // Handle MetaMask events
+  // Effect to handle MetaMask events
   useEffect(() => {
     if (!window.ethereum) return;
 
+    // Handle account changes in MetaMask
     const handleAccountsChanged = async (accounts) => {
       try {
         console.log('Accounts changed:', accounts);
@@ -109,80 +117,81 @@ export const ConnectWalletButton = ({ account, provider, onProviderUpdate, onAcc
       }
     };
 
+    let isSwitchingNetwork = false;
 
-let isSwitchingNetwork = false; // Track if a network switch is in progress
-
-const handleChainChanged = async (chainId) => {
-  if (isSwitchingNetwork) {
-    console.log('Ignoring redundant chainChanged event during network switch.');
-    return;
-  }
-
-  isSwitchingNetwork = true; // Set the flag immediately to prevent redundant calls
-
-  try {
-    console.log(`Chain changed to: ${chainId}`);
-    const newProvider = new ethers.BrowserProvider(window.ethereum);
-    const network = await newProvider.getNetwork();
-
-    console.log(`Network detected: ${network.chainId}`);
-    if (network.chainId === 11155111n) {
-      const accounts = await newProvider.send('eth_accounts', []);
-      if (accounts.length > 0) {
-        console.log('Provider and account updated successfully.');
-        memoizedOnProviderUpdate(newProvider);
-        memoizedOnAccountUpdate(accounts[0]);
-      } else {
-        console.warn('No accounts found after chain change.');
-        memoizedOnProviderUpdate(null);
-        memoizedOnAccountUpdate(null);
+    // Handle network changes in MetaMask
+    const handleChainChanged = async (chainId) => {
+      if (isSwitchingNetwork) {
+        console.log('Ignoring redundant chainChanged event during network switch.');
+        return;
       }
-    } else {
-      console.log('Switching to Sepolia network...');
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0xaa36a7' }], // Sepolia chainId
-      });
 
-      // Re-verify the network after switching
-      const updatedNetwork = await newProvider.getNetwork();
-      console.log(`Updated network detected: ${updatedNetwork.chainId}`);
-      if (updatedNetwork.chainId === 11155111n) {
-        const accounts = await newProvider.send('eth_accounts', []);
-        if (accounts.length > 0) {
-          console.log('Provider and account updated successfully after switching.');
-          memoizedOnProviderUpdate(newProvider);
-          memoizedOnAccountUpdate(accounts[0]);
+      isSwitchingNetwork = true;
+
+      try {
+        console.log(`Chain changed to: ${chainId}`);
+        const newProvider = new ethers.BrowserProvider(window.ethereum);
+        const network = await newProvider.getNetwork();
+
+        console.log(`Network detected: ${network.chainId}`);
+        if (network.chainId === 11155111n) {
+          const accounts = await newProvider.send('eth_accounts', []);
+          if (accounts.length > 0) {
+            console.log('Provider and account updated successfully.');
+            memoizedOnProviderUpdate(newProvider);
+            memoizedOnAccountUpdate(accounts[0]);
+          } else {
+            console.warn('No accounts found after chain change.');
+            memoizedOnProviderUpdate(null);
+            memoizedOnAccountUpdate(null);
+          }
         } else {
-          console.warn('No accounts found after switching to Sepolia.');
-          memoizedOnProviderUpdate(null);
-          memoizedOnAccountUpdate(null);
+          console.log('Switching to Sepolia network...');
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0xaa36a7' }],
+          });
+
+          const updatedNetwork = await newProvider.getNetwork();
+          console.log(`Updated network detected: ${updatedNetwork.chainId}`);
+          if (updatedNetwork.chainId === 11155111n) {
+            const accounts = await newProvider.send('eth_accounts', []);
+            if (accounts.length > 0) {
+              console.log('Provider and account updated successfully after switching.');
+              memoizedOnProviderUpdate(newProvider);
+              memoizedOnAccountUpdate(accounts[0]);
+            } else {
+              console.warn('No accounts found after switching to Sepolia.');
+              memoizedOnProviderUpdate(null);
+              memoizedOnAccountUpdate(null);
+            }
+          } else {
+            alert('Failed to switch to Sepolia. Please select Sepolia in MetaMask.');
+            memoizedOnProviderUpdate(null);
+            memoizedOnAccountUpdate(null);
+          }
         }
-      } else {
-        alert('Failed to switch to Sepolia. Please select Sepolia in MetaMask.');
+      } catch (error) {
+        if (error.code === 'NETWORK_ERROR') {
+          console.log('Suppressed NETWORK_ERROR during chain change:', error.message);
+        } else {
+          console.error('Error handling chain changed:', error);
+          alert('Error updating network. Please try again.');
+        }
         memoizedOnProviderUpdate(null);
         memoizedOnAccountUpdate(null);
+      } finally {
+        isSwitchingNetwork = false;
       }
-    }
-  } catch (error) {
-    if (error.code === 'NETWORK_ERROR') {
-      console.log('Suppressed NETWORK_ERROR during chain change:', error.message);
-    } else {
-      console.error('Error handling chain changed:', error);
-      alert('Error updating network. Please try again.');
-    }
-    memoizedOnProviderUpdate(null);
-    memoizedOnAccountUpdate(null);
-  } finally {
-    isSwitchingNetwork = false; // Reset the flag after handling
-  }
-};
-
-    const handleConnectEvent = (info) => {
-      console.log('MetaMask connected:', info);
-      handleConnect(); // Re-check account and network on connect
     };
 
+    // Handle MetaMask connection event
+    const handleConnectEvent = (info) => {
+      console.log('MetaMask connected:', info);
+      handleConnect();
+    };
+
+    // Handle MetaMask disconnection event
     const handleDisconnectEvent = (error) => {
       console.log('MetaMask disconnected:', error);
       memoizedOnProviderUpdate(null);
@@ -190,13 +199,13 @@ const handleChainChanged = async (chainId) => {
       alert('MetaMask disconnected. Please reconnect to continue.');
     };
 
-    // Subscribe to MetaMask events
+    // Register event listeners
     window.ethereum.on('accountsChanged', handleAccountsChanged);
     window.ethereum.on('chainChanged', handleChainChanged);
     window.ethereum.on('connect', handleConnectEvent);
     window.ethereum.on('disconnect', handleDisconnectEvent);
 
-    // Cleanup listeners on unmount
+    // Cleanup event listeners on unmount
     return () => {
       window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       window.ethereum.removeListener('chainChanged', handleChainChanged);
@@ -205,6 +214,7 @@ const handleChainChanged = async (chainId) => {
     };
   }, [memoizedOnProviderUpdate, memoizedOnAccountUpdate, handleConnect]);
 
+  // Render the button with dynamic text and styles based on connection state
   return (
     <button
       onClick={account ? handleDisconnect : handleConnect}

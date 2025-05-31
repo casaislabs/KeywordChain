@@ -2,19 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fondo general */
 body {
-  background: linear-gradient(to bottom, #0a0f1c, #1a2238); /* Fondo degradado oscuro */
-  color: #e2e8f0; /* Texto claro */
+  background: linear-gradient(to bottom, #0a0f1c, #1a2238);
+  color: #e2e8f0;
   font-family: 'Inter', sans-serif;
-  display: flex; /* Usamos flexbox */
-  justify-content: center; /* Centra horizontalmente */
-  align-items: center; /* Centra verticalmente */
-  height: 100vh; /* Altura completa de la ventana */
-  margin: 0; /* Elimina márgenes predeterminados */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
 
-/* Animaciones personalizadas */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -46,7 +44,6 @@ body {
   }
 }
 
-/* Clases utilitarias para animaciones */
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -59,28 +56,26 @@ body {
   animation: pulse 1.5s infinite;
 }
 
-/* Input personalizado */
 input {
-  background-color: #1e293b; /* Fondo oscuro */
-  color: #cbd5e1; /* Texto claro */
-  border: 2px solid transparent; /* Borde transparente por defecto */
-  border-radius: 0.75rem; /* Bordes redondeados */
+  background-color: #1e293b;
+  color: #cbd5e1;
+  border: 2px solid transparent;
+  border-radius: 0.75rem;
   padding: 0.75rem;
   transition: all 0.3s ease;
-  appearance: none; /* Elimina estilos predeterminados del navegador */
-  box-shadow: none; /* Elimina sombras predeterminadas */
+  appearance: none;
+  box-shadow: none;
 }
 
 input:focus {
   outline: none;
-  border-color: #3b82f6; /* Azul vibrante para el enfoque */
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); /* Brillo azul */
+  border-color: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
-/* Botón personalizado */
 button {
-  background-color: #3b82f6; /* Azul vibrante */
-  color: #ffffff; /* Texto blanco */
+  background-color: #3b82f6;
+  color: #ffffff;
   border: none;
   border-radius: 0.75rem;
   padding: 0.75rem 1.5rem;
@@ -89,26 +84,24 @@ button {
 }
 
 button:hover {
-  background-color: #2563eb; /* Azul más oscuro al pasar el mouse */
+  background-color: #2563eb;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); /* Sombra azul */
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 button:disabled {
-  background-color: #64748b; /* Gris para estado deshabilitado */
+  background-color: #64748b;
   color: #94a3b8;
   cursor: not-allowed;
 }
 
-/* Contenedor principal */
 .container {
-  background-color: #1e293b; /* Fondo oscuro */
-  border-radius: 1.5rem; /* Bordes redondeados */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Sombra */
+  background-color: #1e293b;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   padding: 2rem;
 }
 
-/* Piezas del rompecabezas */
 .puzzle-piece {
   clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%);
 }
