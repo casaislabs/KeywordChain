@@ -42,13 +42,13 @@ The contract has been successfully verified on both Etherscan and Sourcify.
 
 ---
 
-```markdown
+
 ## Contract Limitations
 
 - **Maximum Text Length**: 256 characters.
 - **Maximum Keyword Length**: 32 characters.
 - **Keyword Validation**: Keywords must be alphanumeric.
-- **Reentrancy Protection**: Prevents multiple calls to the same function within a single transaction.```
+- **Reentrancy Protection**: Prevents multiple calls to the same function within a single transaction.
 
 ---
 
