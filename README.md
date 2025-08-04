@@ -7,7 +7,7 @@ The `KeywordChain` project is a blockchain-based application that allows users t
 The contract has been successfully verified on both Etherscan and Sourcify.
 
 - **Smart Contract**: Deployed on the Sepolia test network.
-- **Frontend**: Deployed on Vercel at [KeywordChain](https://keyword-chain.vercel.app/).
+- **Frontend**: Deployed on Vercel at [KeywordChain](https://keyword-chain.casaislabs.com/).
 
 ---
 
